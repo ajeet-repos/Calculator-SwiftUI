@@ -18,13 +18,14 @@ struct ContentView: View {
     ]
     
     @State var noBeingEntered: String = ""
+    @State var finalValue:String = "DigitalCurry Recepie"
     @State var calExpression: [String] = []
     
     
     var body: some View {
         VStack {
             VStack {
-                Text("405456")
+                Text(self.finalValue)
                     .font(Font.custom("HelveticaNeue-Thin", size: 78))
                     .frame(idealWidth: 100, maxWidth: .infinity, idealHeight: 100, maxHeight: .infinity, alignment: .center)
                     .foregroundColor(Color.white)
@@ -44,19 +45,27 @@ struct ContentView: View {
                             Spacer(minLength: 13)
                             ForEach(row, id: \.self) { column in
                                 Button(action: {
-                                    if column == "/" {
+                                    if column == "=" {
+                                        self.calExpression = []
+                                        self.noBeingEntered = ""
+                                        return
+                                    } else if checkIfOperator(str: column)  {
                                         self.calExpression.append(column)
                                         self.noBeingEntered = ""
                                     } else {
                                         self.noBeingEntered.append(column)
                                         if self.calExpression.count == 0 {
                                             self.calExpression.append(self.noBeingEntered)
-                                        } else {g
-                                            self.calExpression.remove(at: self.calExpression.count-1)
+                                        } else {
+                                            if !checkIfOperator(str: self.calExpression[self.calExpression.count-1]) {
+                                                self.calExpression.remove(at: self.calExpression.count-1)
+                                            }
+                                            
                                             self.calExpression.append(self.noBeingEntered)
                                         }
-                                        
                                     }
+                                    
+                                    self.finalValue = processExpression(exp: self.calExpression)
                                     
                                     print(self.noBeingEntered)
                                 }, label: {
@@ -75,25 +84,35 @@ struct ContentView: View {
             .background(Color.black)
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, idealHeight: 414, maxHeight: .infinity, alignment: .topLeading)
         }
+        .background(Color.black)
+        .edgesIgnoringSafeArea(.all)
     }
 }
 
 func getBackground(str:String) -> Color {
     
-    if str == "/" || str == "x" || str == "-" || str == "+" || str == "=" {
+    if checkIfOperator(str: str) {
         return Color.blue
     }
-    
     return Color.black
 }
 
 func getFontSize(btnTxt: String) -> CGFloat {
     
-    if btnTxt == "/" || btnTxt == "x" || btnTxt == "-" || btnTxt == "+" || btnTxt == "=" {
+    if checkIfOperator(str: btnTxt) {
         return 28
     }
-    
     return 18
+    
+}
+
+func checkIfOperator(str:String) -> Bool {
+    
+    if str == "/" || str == "x" || str == "-" || str == "+" || str == "=" {
+        return true
+    }
+    
+    return false
     
 }
 
@@ -106,6 +125,37 @@ func flattenTheExpression(exps: [String]) -> String {
     
     return calExp
     
+}
+
+func processExpression(exp:[String]) -> String {
+    
+    if exp.count < 3 {
+        return "0.0"
+    }
+    
+    var a = Double(exp[0])
+    var c = Double("0.0")
+    let expSize = exp.count
+    
+    for i in (1...expSize-2) {
+        
+        c = Double(exp[i+1])
+        
+        switch exp[i] {
+        case "+":
+            a! += c!
+        case "-":
+            a! -= c!
+        case "x":
+            a! *= c!
+        case "/":
+            a! /= c!
+        default:
+            print("skipping the rest")
+        }
+    }
+    
+    return String(format: "%.1f", a!)
 }
 
 struct CustomShape: Shape {
