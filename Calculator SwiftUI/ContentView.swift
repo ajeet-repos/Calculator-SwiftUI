@@ -8,19 +8,20 @@
 
 import SwiftUI
 
+let primaryColor = Color.init(red: 0, green: 116/255, blue: 178/255, opacity: 1.0)
+
 struct ContentView: View {
     
     let rows = [
-        ["7", "8", "9", "/"],
-        ["4", "5", "6", "x"],
-        ["1", "2", "3", "-"],
+        ["7", "8", "9", "÷"],
+        ["4", "5", "6", "×"],
+        ["1", "2", "3", "−"],
         [".", "0", "=", "+"]
     ]
     
     @State var noBeingEntered: String = ""
-    @State var finalValue:String = "DigitalCurry Recepie"
+    @State var finalValue:String = "DigitalCurry Recipe"
     @State var calExpression: [String] = []
-    
     
     var body: some View {
         VStack {
@@ -36,7 +37,7 @@ struct ContentView: View {
                 Spacer()
             }
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
-            .background(Color.blue)
+            .background(primaryColor)
             VStack {
                 Spacer(minLength: 48)
                 VStack {
@@ -60,19 +61,23 @@ struct ContentView: View {
                                             if !checkIfOperator(str: self.calExpression[self.calExpression.count-1]) {
                                                 self.calExpression.remove(at: self.calExpression.count-1)
                                             }
-                                            
+
                                             self.calExpression.append(self.noBeingEntered)
                                         }
                                     }
-                                    
+
                                     self.finalValue = processExpression(exp: self.calExpression)
                                     
-                                    print(self.noBeingEntered)
+                                    if self.calExpression.count > 3 {
+                                        self.calExpression = [self.finalValue, self.calExpression[self.calExpression.count - 1]]
+                                    }
+
                                 }, label: {
                                     Text(column)
                                     .font(.system(size: getFontSize(btnTxt: column)))
                                     .frame(idealWidth: 100, maxWidth: .infinity, idealHeight: 100, maxHeight: .infinity, alignment: .center)
-                                })
+                                }
+                                )
                                 .foregroundColor(Color.white)
                                 .background(getBackground(str: column))
                                 .mask(CustomShape(radius: 40, value: column))
@@ -92,7 +97,7 @@ struct ContentView: View {
 func getBackground(str:String) -> Color {
     
     if checkIfOperator(str: str) {
-        return Color.blue
+        return primaryColor
     }
     return Color.black
 }
@@ -100,15 +105,15 @@ func getBackground(str:String) -> Color {
 func getFontSize(btnTxt: String) -> CGFloat {
     
     if checkIfOperator(str: btnTxt) {
-        return 28
+        return 42
     }
-    return 18
+    return 24
     
 }
 
 func checkIfOperator(str:String) -> Bool {
     
-    if str == "/" || str == "x" || str == "-" || str == "+" || str == "=" {
+    if str == "÷" || str == "×" || str == "−" || str == "+" || str == "=" {
         return true
     }
     
@@ -130,11 +135,11 @@ func flattenTheExpression(exps: [String]) -> String {
 func processExpression(exp:[String]) -> String {
     
     if exp.count < 3 {
-        return "0.0"
+        return "0.0"    // Less than 3 means that expression doesnt contain the 2nd no.
     }
     
-    var a = Double(exp[0])
-    var c = Double("0.0")
+    var a = Double(exp[0])  // Get the first no
+    var c = Double("0.0")   // Init the second no
     let expSize = exp.count
     
     for i in (1...expSize-2) {
@@ -144,11 +149,11 @@ func processExpression(exp:[String]) -> String {
         switch exp[i] {
         case "+":
             a! += c!
-        case "-":
+        case "−":
             a! -= c!
-        case "x":
+        case "×":
             a! *= c!
-        case "/":
+        case "÷":
             a! /= c!
         default:
             print("skipping the rest")
@@ -176,19 +181,16 @@ struct CustomShape: Shape {
         path.move(to: tr)
         path.addLine(to: br)
         path.addLine(to: bl)
-        if value == "/" || value == "=" {
+        if value == "÷" || value == "=" {
             path.addLine(to: tls)
             path.addRelativeArc(center: tlc, radius: radius, startAngle: Angle.degrees(90), delta: Angle.degrees(180))
         } else {
             path.addLine(to: tl)
         }
         
-    
-        
         return path
     }
 }
-
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
