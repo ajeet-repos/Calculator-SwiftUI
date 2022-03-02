@@ -51,9 +51,21 @@ struct ContentView: View {
                                         self.noBeingEntered = ""
                                         return
                                     } else if checkIfOperator(str: column)  {
+                                        if checkIfOperator(str: calExpression.last!) {
+                                            calExpression.removeLast()
+                                        }
                                         self.calExpression.append(column)
                                         self.noBeingEntered = ""
                                     } else {
+                                        var haveDot = false
+                                        for item in noBeingEntered {
+                                            if item == "." {
+                                                haveDot = true
+                                            }
+                                        }
+                                        if column=="." && haveDot {
+                                            return
+                                        }
                                         self.noBeingEntered.append(column)
                                         if self.calExpression.count == 0 {
                                             self.calExpression.append(self.noBeingEntered)
